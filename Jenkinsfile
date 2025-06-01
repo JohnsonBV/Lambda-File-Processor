@@ -1,15 +1,19 @@
 pipeline {
     agent any
-
     environment {
-        AWS_REGION = "us-east-2"
-        FUNCTION_NAME = "fileProcessorLambda"
+        AWS_REGION = 'us-east-2'
     }
-
     stages {
         stage('Clone Repo') {
             steps {
                 git branch: 'main', url: 'https://github.com/JohnsonBV/Lambda-File-Processor.git'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'pip install pytest'
+                sh 'pytest tests/'
             }
         }
 
@@ -20,15 +24,17 @@ pipeline {
         }
 
         stage('Update Lambda') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('aws-access-key')
+                AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+            }
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-lambda-creds']]) {
-                    sh """
+                sh '''
                     aws lambda update-function-code \
-                        --function-name $FUNCTION_NAME \
-                        --zip-file fileb://lambda.zip \
-                        --region $AWS_REGION
-                    """
-                }
+                    --function-name fileProcessorLambda \
+                    --zip-file fileb://lambda.zip \
+                    --region ${AWS_REGION}
+                '''
             }
         }
     }
