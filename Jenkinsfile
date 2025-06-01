@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
         AWS_DEFAULT_REGION = 'us-east-2'
     }
 
@@ -24,7 +22,7 @@ pipeline {
             steps {
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-lambda-creds' // or your Jenkins AWS credentials ID
+                    credentialsId: 'aws-lambda-creds'
                 ]]) {
                     sh '''
                         aws lambda update-function-code \
