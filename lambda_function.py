@@ -3,16 +3,11 @@ import json
 def lambda_handler(event, context):
     try:
         print("Received event:", json.dumps(event))
-
-        # Get the JSON body from the API Gateway event
-        body = json.loads(event.get("body", "{}"))
-        message = body.get("message", "No message received")
-
+        message = event.get("message", "No message received")
         return {
             'statusCode': 200,
-            'body': json.dumps({'echo': message})
+            'body': json.dumps({"response": f"Message received: {message}"})
         }
-
     except Exception as e:
         print("Error:", str(e))
         return {
